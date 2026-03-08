@@ -85,6 +85,7 @@ const DonatePage = () => {
                         amount: Number(amount),
                         orderId: data.order.id,
                         paymentId: response.razorpay_payment_id,
+                        razorpay_signature: response.razorpay_signature
                     }),
                     });
 
