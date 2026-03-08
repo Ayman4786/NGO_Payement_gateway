@@ -201,7 +201,7 @@ app.post("/payment-success", async (req, res) => {
 
 
 
-// WEBHOOK
+// Razorpay WEBHOOK
 app.post("/razorpay-webhook", async (req, res) => {
 
   console.log("🔥 Razorpay webhook received");

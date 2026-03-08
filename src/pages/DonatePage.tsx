@@ -10,6 +10,7 @@ const DonatePage = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [amount, setAmount] = useState("");
+  const [loading, setLoading] = useState(false);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -55,7 +56,12 @@ const DonatePage = () => {
         </div>
 
         <button
+          disabled={loading}
             onClick={async () => {
+
+              if (loading) return;
+                  setLoading(true);
+          
                 const res = await fetch("http://localhost:5000/create-order", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -67,6 +73,20 @@ const DonatePage = () => {
                 });
 
                 const data = await res.json();
+
+                // Backend validation errors
+                if (!res.ok) {
+                  alert(data.errors?.[0]?.msg || "Something went wrong");
+                  setLoading(false);
+                  return;
+                }
+
+                // 🔒 Safety check for order creation
+                if (!data.order) {
+                  alert("Unable to start payment. Please try again.");
+                  setLoading(false);
+                  return;
+                }
 
                 const options = {
                 key: import.meta.env.VITE_RAZORPAY_KEY_ID,
@@ -89,6 +109,7 @@ const DonatePage = () => {
                     }),
                     });
 
+                    setLoading(false);
                     // 2️⃣ Final user confirmation
                     alert("Donation Successful! Receipt sent to your email.");
                 },
@@ -104,11 +125,16 @@ const DonatePage = () => {
                 };
 
                 const rzp = new window.Razorpay(options);
+
+                rzp.on("payment.failed", function () {
+                  setLoading(false);
+                  alert("Amount exceeding \nPayment failed or cancelled.");
+                });
                 rzp.open();
             }}
             className="w-full bg-red-600 text-white py-2 rounded hover:bg-red-700"
             >
-            Donate Now
+            {loading ? "Processing..." : "Donate Now"}
         </button>
       </div>
     </div>
